@@ -38,5 +38,7 @@ python library.py
 ```
 
 
-Автор: Егор Зыбин(https://github.com/EgorZybin)(https://t.me/raizzep)
+Автор: Егор Зыбин
+GitHub(https://github.com/EgorZybin) 
+Telegram(https://t.me/raizzep)
 
