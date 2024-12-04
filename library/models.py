@@ -6,6 +6,7 @@ class Book:
     """
         Класс Book представляет модель книги.
     """
+
     def __init__(self, id, title, author, year, status="в наличии"):
         self.id = id
         self.title = title
@@ -27,7 +28,8 @@ class Library:
     """
         Класс Library представляет модель библиотеки.
     """
-    def __init__(self, filename='library.json'):
+
+    def __init__(self, filename="../db/library.json"):
         """
             Инициализация библиотеки.
         """
@@ -44,9 +46,8 @@ class Library:
         return []
 
     def save_books(self):
-        """
-            Функция сохраняет книги в файл.
-        """
+        if not os.path.exists(os.path.dirname(self.filename)):
+            os.makedirs(os.path.dirname(self.filename))
         with open(self.filename, 'w') as f:
             json.dump([book.to_dict() for book in self.books], f, ensure_ascii=False, indent=4)
 
@@ -74,7 +75,9 @@ class Library:
         """
             Функция ищет книги по заголовку, автору или году выпуска.
         """
-        found_books = [book for book in self.books if (keyword.lower() in book.title.lower()) or (keyword.lower() in book.author.lower()) or (keyword == str(book.year))]
+        found_books = [book for book in self.books if
+                       (keyword.lower() in book.title.lower()) or (keyword.lower() in book.author.lower()) or (
+                                   keyword == str(book.year))]
         if found_books:
             for book in found_books:
                 print(f'{book.id}: {book.title} - {book.author} ({book.year}) [Статус: {book.status}]')
