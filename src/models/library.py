@@ -1,34 +1,33 @@
 import os
 import json
 from models.book import Book
+from abc import ABC, abstractmethod
+from typing import List
+
+
+class LibraryRepository(ABC):
+    """Абстрактный класс для работы с хранилищем книг."""
+
+    @abstractmethod
+    def load_books(self) -> List[Book]:
+        pass
+
+    @abstractmethod
+    def save_books(self, books: List[Book]) -> None:
+        pass
 
 
 class Library:
     """
-        Класс Library представляет модель библиотеки.
+        Класс управляющий библиотекой.
     """
 
-    def __init__(self, filename: str = "../db/library.json") -> None:
+    def __init__(self, repository: LibraryRepository) -> None:
         """
             Инициализация библиотеки.
         """
-        self.filename: str = filename
-        self.books = self.load_books()
-
-    def load_books(self) -> list:
-        """
-            Функция загружает книги из файла.
-        """
-        if os.path.exists(self.filename):
-            with open(self.filename, 'r') as f:
-                return [Book(**data) for data in json.load(f)]
-        return []
-
-    def save_books(self) -> None:
-        if not os.path.exists(os.path.dirname(self.filename)):
-            os.makedirs(os.path.dirname(self.filename))
-        with open(self.filename, 'w') as f:
-            json.dump([book.to_dict() for book in self.books], f, ensure_ascii=False, indent=4)
+        self.repository = repository
+        self.books = self.repository.load_books()
 
     def add_book(self) -> Book:
         """
@@ -48,7 +47,7 @@ class Library:
         new_id = len(self.books) + 1
         new_book = Book(new_id, title, author, year)
         self.books.append(new_book)
-        self.save_books()
+        self.repository.save_books(self.books)
         print("Книга успешно добавлена.")
 
     def delete_book(self) -> None:
@@ -59,12 +58,12 @@ class Library:
         for book in self.books:
             if book.book_id == book_id:
                 self.books.remove(book)
-                self.save_books()
+                self.repository.save_books(self.books)
                 print("Книга успешно удалена.")
                 return
         print(f'Книга с ID {book_id} не найдена.')
 
-    def find_books(self,) -> None:
+    def find_books(self, ) -> None:
         """
             Функция ищет книги по заголовку, автору или году выпуска.
         """
@@ -78,15 +77,22 @@ class Library:
         else:
             print('Книги не найдены.')
 
+    def _display_books(self, books: List[Book]) -> None:
+        """
+        Выводит список книг.
+        """
+        for book in books:
+            print(f'{book.book_id}: {book.title} - {book.author} ({book.year}) [Статус: {book.status}]')
+
     def display_books(self) -> None:
         """
-            Функция отображает все книги в библиотеке.
+        Выводит все книги.
+        :return:
         """
         if not self.books:
-            print('Библиотека пуста.')
-            return
-        for book in self.books:
-            print(f'{book.book_id}: {book.title} - {book.author} ({book.year}) [Статус: {book.status}]')
+            print("Библиотека пуста.")
+        else:
+            self._display_books(self.books)
 
     def change_status(self) -> None:
         """
@@ -98,7 +104,7 @@ class Library:
                 new_status = input('Введите новый статус ("в наличии" или "выдана"): ')
                 if new_status in ["в наличии", "выдана"]:
                     book.status = new_status
-                    self.save_books()
+                    self.repository.save_books(self.books)
                     print('Статус книги успешно изменен.')
                     return
                 else:

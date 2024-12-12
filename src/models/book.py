@@ -1,14 +1,14 @@
-class Book:
-    """
-        Класс Book представляет модель книги.
-    """
+from dataclasses import dataclass
 
-    def __init__(self, book_id: int, title: str, author: str, year: int, status: str = "в наличии"):
-        self.book_id = book_id
-        self.title = title
-        self.author = author
-        self.year = year
-        self.status = status
+
+@dataclass
+class Book:
+    """Класс, представляющий книгу в библиотеке."""
+    book_id: int  # Уникальный идентификатор книги
+    title: str  # Название книги
+    author: str  # Автор книги
+    year: int  # Год издания книги
+    status: str = "в наличии"  # Статус книги (по умолчанию "в наличии")
 
     def to_dict(self) -> dict:
         return {
